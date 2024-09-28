@@ -1,14 +1,14 @@
 version: '3'
 services:
-  hyperf-php:
-    container_name: hyperf-php
+  transaction-api:
+    container_name: transaction-api
     image: hyperf-skeleton
     build:
       context: .
     volumes:
       - ./:/var/www
     ports:
-      - 9550:9501
+      - 9650:9501
     environment:
       - APP_ENV=dev
       - SCAN_CACHEABLE=false
@@ -16,34 +16,15 @@ services:
       - mysql
   mysql:
     image: mysql:5.7
-    container_name: hyperf-mysql
+    container_name: transaction-mysql
     volumes:
-      - ./hyperf-mysql-data:/var/lib/mysql
+      - ./transaction-mysql-data:/var/lib/mysql
     ports:
-      - 3350:3306
+      - 3360:3306
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: hyperf_database
+      MYSQL_DATABASE: transaction_database
       MYSQL_TCP_PORT: 3306
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: hyperf-rabbitmq
-    ports:
-      - 5650:5672
-      - 15650:15672
-    volumes:
-      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
-  redis:
-    image: redis:latest
-    container_name: hyperf-redis
-    restart: unless-stopped
-    ports:
-      - 6550:6379
-    expose:
-      - "6379"
-    volumes:
-      - ./hyperf-redis-data:/data
 networks:
-  hyperf-php-network:
+  transaction-api-network:
     driver: bridge

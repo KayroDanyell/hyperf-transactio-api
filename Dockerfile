@@ -37,4 +37,4 @@ COPY . /var/www
 
 EXPOSE 9501
 
-ENTRYPOINT ["php", "/var/www/bin/hyperf.php", "start"]
+ENTRYPOINT ["php", "/var/www/bin/hyperf.php", "server:watch"]
