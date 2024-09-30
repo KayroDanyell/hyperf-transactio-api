@@ -9,6 +9,14 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
+use Hyperf\Context\ApplicationContext;
+use Hyperf\Contract\ConfigInterface;
+use Hyperf\Contract\StdoutLoggerInterface;
+use Hyperf\Database\Model\Factory;
+use Hyperf\Database\Model\FactoryBuilder;
+use Psr\Log\LogLevel;
+
 ini_set('display_errors', 'on');
 ini_set('display_startup_errors', 'on');
 
@@ -28,3 +36,36 @@ Hyperf\Di\ClassLoader::init();
 $container = require BASE_PATH . '/config/container.php';
 
 $container->get(Hyperf\Contract\ApplicationInterface::class);
+
+$config = $container->get(ConfigInterface::class);
+
+$config->set('logger.default', []);
+
+$config->set(StdoutLoggerInterface::class, [
+    'log_level' => [
+        LogLevel::ALERT,
+        LogLevel::CRITICAL,
+        LogLevel::EMERGENCY,
+        LogLevel::ERROR,
+        LogLevel::INFO,
+        LogLevel::NOTICE,
+        LogLevel::WARNING,
+    ],
+]);
+
+run(function () use ($container) {
+    $container = ApplicationContext::getContainer();
+    $container->get('Hyperf\Database\Commands\Migrations\FreshCommand')->run(
+        new Symfony\Component\Console\Input\StringInput(''),
+        new Symfony\Component\Console\Output\ConsoleOutput()
+    );
+});
+
+if (! function_exists('factory')) {
+    function factory($argument): FactoryBuilder
+    {
+        $factory = ApplicationContext::getContainer()->get(Factory::class);
+
+        return $factory->of($argument);
+    }
+}

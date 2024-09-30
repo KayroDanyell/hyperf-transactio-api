@@ -10,15 +10,16 @@ use Hyperf\DbConnection\Model\Model;
  */
 class Transfer extends Model
 {
+    public bool $incrementing = false;
     /**
      * The table associated with the model.
      */
-    protected ?string $table = 'transfer';
+    protected ?string $table = 'transferences';
 
     /**
      * The attributes that are mass assignable.
      */
-    protected array $fillable = ['payer_id', 'payee_id', 'value', 'confirmed_at'];
+    protected array $fillable = ['id','payer_id', 'payee_id', 'value', 'confirmed_at'];
 
     public function payer()
     {
@@ -28,5 +29,10 @@ class Transfer extends Model
     public function payee()
     {
         return $this->HasOne(User::class, 'payee_id');
+    }
+
+    public function setConfirmedAt(string $date)
+    {
+        $this->confirmed_at = $date;
     }
 }

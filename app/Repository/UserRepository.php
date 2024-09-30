@@ -2,16 +2,17 @@
 
 namespace App\Repository;
 
+use App\Entity\UserEntity\UserEntity;
+use App\Model\User;
+
 class UserRepository
 {
+    public User $userModel;
 
-    public function __construct()
+    public function __construct(){}
+
+    public static function find(string $id) : User
     {
-
-    }
-
-    public function find(int $id) : UserEntity
-    {
-        return new UserEntity();
+        return User::find($id);
     }
 }

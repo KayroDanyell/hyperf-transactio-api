@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Interface\Repository\RepositoryInterface;
 use Hyperf\DbConnection\Db;
 
 abstract class AbstractRepository implements RepositoryInterface

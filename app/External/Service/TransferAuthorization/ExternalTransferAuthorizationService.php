@@ -16,8 +16,9 @@ class ExternalTransferAuthorizationService implements TransferAuthorizationServi
     public function __construct()
     {}
 
-    public function authorizeTransfer(TransferDTO $transfer): bool
+    public function externalAuthorizeTransfer(TransferDTO $transfer)
     {
-        return $this->transferAuthorizationRequest->authorize();
+        $result = $this->transferAuthorizationRequest->makeRequest();
+        return $result;
     }
 }

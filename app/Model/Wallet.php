@@ -10,10 +10,11 @@ use Hyperf\DbConnection\Model\Model;
  */
 class Wallet extends Model
 {
+    public bool $incrementing = false;
     /**
      * The table associated with the model.
      */
-    protected ?string $table = 'Wallet';
+    protected ?string $table = 'wallets';
 
     /**
      * The attributes that are mass assignable.
@@ -28,5 +29,15 @@ class Wallet extends Model
     public function hasEnoughBalanceToWithdraw(int $value) : bool
     {
         return $this->balance >= $value;
+    }
+
+    public function getBalance() : int
+    {
+        return $this->balance;
+    }
+
+    public function setBalance(int $balance)
+    {
+        $this->balance = $balance;
     }
 }

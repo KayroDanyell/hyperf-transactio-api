@@ -8,5 +8,5 @@ interface RequestInterface
 {
     public function getClient() : ClientInterface;
 
-    public function authorize();
+    public function makeRequest(array $params=null);
 }

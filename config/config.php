@@ -18,6 +18,8 @@ return [
     'app_name' => env('APP_NAME', 'skeleton'),
     'app_env' => env('APP_ENV', 'dev'),
     'scan_cacheable' => env('SCAN_CACHEABLE', false),
+    'authorization_service_uri' => env('AUTHORIZATION_SERVICE_URI'),
+    'notification_service_uri' => env('NOTIFICATION_SERVICE_URI'),
     StdoutLoggerInterface::class => [
         'log_level' => [
             LogLevel::ALERT,

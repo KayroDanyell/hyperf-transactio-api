@@ -7,6 +7,7 @@ use App\Repository\UserRepository;
 
 readonly class TransferDTO
 {
+    private ?string $id;
     public function __construct(
         public readonly User $payer,
         public readonly User $payee,
@@ -22,23 +23,37 @@ readonly class TransferDTO
         );
     }
 
-    public function getPayer() : UserEntity
+    public function toArray() : array
     {
+        return [
+            'payer' => $this->payer->id,
+            'payee' => $this->payee->id,
+            'value' => $this->value
+        ];
     }
 
-    public function getPayee() : UserEntity
+    public function getPayer() : User
     {
+        return $this->payer;
+    }
+
+    public function getPayee() : User
+    {
+        return $this->payee;
     }
 
     public function getValue() : int
     {
+        return $this->value;
     }
 
-    public function setId(int $id)
+    public function setId(string $id)
     {
+        $this->id = $id;
     }
 
-    public function getId() : int
+    public function getId() : string
     {
+        return $this->id;
     }
 }

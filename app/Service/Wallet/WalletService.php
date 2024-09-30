@@ -19,12 +19,13 @@ class WalletService
         $wallet = $this->walletRepository->getByOwnerId($user->getId());
 
         return $this->walletRepository->debit($wallet, $value);
-
     }
 
-    public function deposit()
+    public function deposit(User $user, int $value)
     {
+        $wallet = $this->walletRepository->getByOwnerId($user->getId());
 
+        return $this->walletRepository->credit($wallet, $value);
     }
 
 

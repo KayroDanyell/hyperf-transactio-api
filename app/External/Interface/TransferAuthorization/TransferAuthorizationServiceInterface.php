@@ -6,5 +6,6 @@ use App\DTO\TransferDTO;
 
 interface TransferAuthorizationServiceInterface
 {
-    public function authorizeTransfer(TransferDTO $transfer) : bool;
+    public function __construct();
+    public function externalAuthorizeTransfer(TransferDTO $transfer);
 }

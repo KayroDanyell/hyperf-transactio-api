@@ -4,20 +4,20 @@ use Hyperf\Database\Schema\Schema;
 use Hyperf\Database\Schema\Blueprint;
 use Hyperf\Database\Migrations\Migration;
 
-class CreateTransferTable extends Migration
+class CreateWalletsTable extends Migration
 {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('transferences', function (Blueprint $table) {
+        Schema::create('wallets', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('payer_id');
-            $table->uuid('payee_id');
-            $table->integer('value');
-            $table->timestamp('confirmed_at')->nullable();
+            $table->uuid('owner_id');
+            $table->integer('balance');
             $table->datetimes();
+
+            $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -26,6 +26,6 @@ class CreateTransferTable extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transferences');
+        Schema::dropIfExists('wallets');
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Request;
 
+use App\Model\User;
+use App\Repository\UserRepository;
 use Hyperf\Validation\Request\FormRequest;
 
 class TransferRequest extends FormRequest
@@ -23,9 +25,39 @@ class TransferRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'payer' => ['required','numeric','exists:users,id'],
-            'payee' => ['required','numeric','exists:users,id'],
+            'payer' => ['required','exists:users,id'],
+            'payee' => ['required','exists:users,id','different:payer'],
             'value' => ['required','numeric','min:1'],
         ];
+    }
+
+    public function getPayer(): User
+    {
+        return UserRepository::find($this->input('payer'));
+    }
+
+    public function setPayer(?string $payer): void
+    {
+        $this->payer = $payer;
+    }
+
+    public function getPayee(): User
+    {
+        return UserRepository::find($this->input('payee'));
+    }
+
+    public function setPayee(?string $payee): void
+    {
+        $this->payee = $payee;
+    }
+
+    public function getValue(): int
+    {
+        return (int) $this->input('value') * 100;
+    }
+
+    public function setValue(?float $value): void
+    {
+        $this->value = $value;
     }
 }

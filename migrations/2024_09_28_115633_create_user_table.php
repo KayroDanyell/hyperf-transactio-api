@@ -1,8 +1,9 @@
 <?php
 
-use Hyperf\Database\Schema\Schema;
-use Hyperf\Database\Schema\Blueprint;
+use App\Enum\UserTypesEnum;
 use Hyperf\Database\Migrations\Migration;
+use Hyperf\Database\Schema\Blueprint;
+use Hyperf\Database\Schema\Schema;
 
 class CreateUserTable extends Migration
 {
@@ -11,12 +12,12 @@ class CreateUserTable extends Migration
      */
     public function up(): void
     {
-        Schema::create('user', function (Blueprint $table) {
-            $table->bigIncrements('id');
+        Schema::create('users', function (Blueprint $table) {
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->string('email')->unique();
             $table->string('document')->unique();
-            $table->enum('type',UserTypesEnum::cases());
+            $table->enum('type', UserTypesEnum::values())->default(UserTypesEnum::COMMON->value);
             $table->datetimes();
         });
     }
@@ -26,6 +27,6 @@ class CreateUserTable extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user');
+        Schema::dropIfExists('users');
     }
 }

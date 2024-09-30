@@ -3,9 +3,13 @@
 namespace App\Service;
 
 use App\DTO\TransferDTO;
+use App\Enum\Notification\NotificationMessagesEnum;
 use App\Exception\MerchantCannotTransferException;
 use App\Exception\TransferNotAuthorizedException;
+use App\Exception\WalletInsufficientBalanceException;
 use App\External\Interface\TransferAuthorization\TransferAuthorizationServiceInterface;
+use App\External\Service\TransferAuthorization\ExternalTransferAuthorizationService;
+use App\Interface\Notification\NotificationInterface;
 use App\Repository\TransferRepository;
 use App\Service\Wallet\WalletService;
 use Hyperf\DbConnection\Db;
@@ -13,18 +17,20 @@ use Hyperf\Di\Annotation\Inject;
 
 class TransferService
 {
-
-    #[Inject]
-    private TransferAuthorizationServiceInterface $transferAuthorizationService;
-
     #[Inject]
     private TransferRepository $transferRepository;
-
     #[Inject]
     private WalletService $walletService;
 
+    private NotificationInterface $notification;
+    private ExternalTransferAuthorizationService $transferAuthorizationService;
+
     public function __construct(
-    ){}
+
+    ){
+        $this->transferAuthorizationService = make(ExternalTransferAuthorizationService::class);
+        $this->notification = make(NotificationInterface::class);
+    }
     public function transfer(TransferDTO $transfer) : TransferDTO
     {
         try {
@@ -33,10 +39,15 @@ class TransferService
             $this->authorizeTransfer($transfer);
 
             $transfer = $this->transferRepository->save($transfer);
-            $this->walletService->withdraw($transfer);
-            $this->walletService->deposit($transfer);
+            $this->walletService->withdraw($transfer->getPayer(), $transfer->getValue());
+            $this->walletService->deposit($transfer->getPayee(), $transfer->getValue());
 
             $this->transferRepository->confirmTransfer($transfer->getId());
+
+            $this->notification->setSubscribers([
+                ['user'=>$transfer->getPayer(),'message'=>NotificationMessagesEnum::SEND_TRANSFER->value],
+                ['user'=>$transfer->getPayee(),'message'=>NotificationMessagesEnum::RECEIVE_TRANSFER->value]
+            ]);
 
             DB::commit();
 
@@ -44,9 +55,6 @@ class TransferService
         }catch(MerchantCannotTransferException | TransferNotAuthorizedException | WalletInsufficientBalanceException $e) {
             DB::rollBack();
             throw $e;
-        }catch(\Throwable $e) {
-            DB::rollBack();
-            throw new \Exception($e->getMessage(), $e->getCode());
         }
     }
 
@@ -56,14 +64,10 @@ class TransferService
             throw new MerchantCannotTransferException();
         }
 
-        $externalAuth = $this->transferAuthorizationService->authorizeTransfer($transfer);
+        $externalAuth = $this->transferAuthorizationService->externalAuthorizeTransfer($transfer);
+        var_dump($externalAuth);
         if (!$externalAuth) {
             throw new TransferNotAuthorizedException();
         }
-
-        if ($transfer->getPayer() == $transfer->getPayee()) {} //TODO: passar para validacao da req
-
-        $payer = $transfer->getPayer();
-
     }
 }
