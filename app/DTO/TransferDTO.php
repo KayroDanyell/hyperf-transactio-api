@@ -8,11 +8,14 @@ use App\Repository\UserRepository;
 readonly class TransferDTO
 {
     private ?string $id;
-    public function __construct(
-        public readonly User $payer,
-        public readonly User $payee,
-        public readonly int $value
-    ){}
+    public readonly User $payer;
+    public readonly User $payee;
+    public readonly int $value;
+    public function __construct(User $payer, User $payee, int $value){
+        $this->payer = $payer;
+        $this->payee = $payee;
+        $this->value = $value;
+    }
 
     public static function fromArray(array $data) : self
     {

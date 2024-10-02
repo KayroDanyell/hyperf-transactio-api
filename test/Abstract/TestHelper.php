@@ -1,23 +1,20 @@
 <?php
 
-namespace HyperfTest;
+namespace HyperfTest\Abstract;
 
 use App\Enum\UserTypesEnum;
-use App\External\Interface\TransferAuthorization\TransferAuthorizationServiceInterface;
 use App\External\Service\TransferAuthorization\ExternalTransferAuthorizationService;
 use App\Model\User;
 use App\Model\Wallet;
-use App\Repositories\UserRepository;
 use Hyperf\Context\ApplicationContext;
-use Hyperf\Testing\Concerns\MakesHttpRequests;
 use Hyperf\Testing\Http\TestResponse;
+use Hyperf\Testing\TestCase;
 use Mockery;
-use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\NullOutput;
 
-class AbstractTest extends TestCase
+class TestHelper extends TestCase
 {
-
-    use MakesHttpRequests;
 
     const DEFAULT_BALANCE = 100000;
     public function __construct(string $name)
@@ -25,6 +22,11 @@ class AbstractTest extends TestCase
         parent::__construct($name);
     }
 
+
+    public function setUp(): void
+    {
+        parent::setUp();
+    }
     public function createCommonUser(int $walletBalance = self::DEFAULT_BALANCE) : User
     {
         $user = factory(User::class)->create([
@@ -64,7 +66,14 @@ class AbstractTest extends TestCase
         );
     }
 
-
+    protected function mockTransactionAuthorizedServiceForUnitTest(bool $return = true): ExternalTransferAuthorizationService
+    {
+        return Mockery::mock(ExternalTransferAuthorizationService::class)
+            ->shouldReceive('externalAuthorizeTransfer')
+            ->andReturn($return)
+            ->getMock()
+            ->makePartial();
+    }
 
     public function formatValues(float|int $value):int
     {
@@ -87,7 +96,21 @@ class AbstractTest extends TestCase
         $this->assertEquals($expectedMessage, $responseContent);
     }
 
-    public function tearDown():void {
-        Mockery::close();
+    public function assertWalletsBalance(int $formattedTransferAmount, User $payer, User $payee)
+    {
+        $walletSubtractedBalance = self::DEFAULT_BALANCE - $formattedTransferAmount;
+        $this->assertEquals($walletSubtractedBalance, $payer->wallet()->first()->balance);
+
+        $walletAddedBalance = self::DEFAULT_BALANCE + $formattedTransferAmount;
+        $this->assertEquals($walletAddedBalance, $payee->wallet()->first()->balance);
+    }
+
+    public function refreshDatabase()
+    {
+        $container = ApplicationContext::getContainer();
+        $container->get('Hyperf\Database\Commands\Migrations\FreshCommand')->run(
+            new StringInput(''),
+            new NullOutput()
+        );
     }
 }

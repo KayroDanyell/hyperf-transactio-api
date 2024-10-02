@@ -7,7 +7,6 @@ use App\Enum\Notification\NotificationMessagesEnum;
 use App\Exception\MerchantCannotTransferException;
 use App\Exception\TransferNotAuthorizedException;
 use App\Exception\WalletInsufficientBalanceException;
-use App\External\Interface\TransferAuthorization\TransferAuthorizationServiceInterface;
 use App\External\Service\TransferAuthorization\ExternalTransferAuthorizationService;
 use App\Interface\Notification\NotificationInterface;
 use App\Repository\TransferRepository;
@@ -48,11 +47,15 @@ class TransferService
                 ['user'=>$transfer->getPayer(),'message'=>NotificationMessagesEnum::SEND_TRANSFER->value],
                 ['user'=>$transfer->getPayee(),'message'=>NotificationMessagesEnum::RECEIVE_TRANSFER->value]
             ]);
+            $this->notification->send();
 
             DB::commit();
 
             return $transfer;
         }catch(MerchantCannotTransferException | TransferNotAuthorizedException | WalletInsufficientBalanceException $e) {
+            DB::rollBack();
+            throw $e;
+        }catch (\Throwable $e) {
             DB::rollBack();
             throw $e;
         }
@@ -65,7 +68,6 @@ class TransferService
         }
 
         $externalAuth = $this->transferAuthorizationService->externalAuthorizeTransfer($transfer);
-        var_dump($externalAuth);
         if (!$externalAuth) {
             throw new TransferNotAuthorizedException();
         }
