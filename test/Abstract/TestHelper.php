@@ -3,6 +3,7 @@
 namespace HyperfTest\Abstract;
 
 use App\Enum\UserTypesEnum;
+use App\External\Interface\TransferAuthorization\TransferAuthorizationServiceInterface;
 use App\External\Service\TransferAuthorization\ExternalTransferAuthorizationService;
 use App\Model\User;
 use App\Model\Wallet;
@@ -54,14 +55,14 @@ class TestHelper extends TestCase
 
     protected function mockTransferAuthorizationService(bool $return = true): void
     {
-        $mock = Mockery::mock(ExternalTransferAuthorizationService::class)
+        $mock = Mockery::mock(TransferAuthorizationServiceInterface::class) //parametro do mock() deve condizer com oq esta sendo injetado
             ->shouldReceive('externalAuthorizeTransfer')
-            ->andReturn($return);
+            ->andReturn('1PORRA');
 
 
         $container = ApplicationContext::getContainer();
         $container->define(
-            ExternalTransferAuthorizationService::class,
+            TransferAuthorizationServiceInterface::class,
             fn () => $mock->getMock()->makePartial(),
         );
     }

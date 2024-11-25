@@ -22,7 +22,7 @@ class TransferTest extends TestHelper
         $this->refreshDatabase();
         parent::setUp();
     }
-    public function testTransferBetweenCommonUsers()
+    public function testTransferBetweenCommonUsers111()
     {
         //arrange
         $this->mockTransferAuthorizationService();

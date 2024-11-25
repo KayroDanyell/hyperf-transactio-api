@@ -7,6 +7,7 @@ use App\Enum\Notification\NotificationMessagesEnum;
 use App\Exception\MerchantCannotTransferException;
 use App\Exception\TransferNotAuthorizedException;
 use App\Exception\WalletInsufficientBalanceException;
+use App\External\Interface\TransferAuthorization\TransferAuthorizationServiceInterface;
 use App\External\Service\TransferAuthorization\ExternalTransferAuthorizationService;
 use App\Interface\Notification\NotificationInterface;
 use App\Repository\TransferRepository;
@@ -22,12 +23,10 @@ class TransferService
     private WalletService $walletService;
 
     private NotificationInterface $notification;
-    private ExternalTransferAuthorizationService $transferAuthorizationService;
+    private TransferAuthorizationServiceInterface $transferAuthorizationService;
 
-    public function __construct(
-
-    ){
-        $this->transferAuthorizationService = make(ExternalTransferAuthorizationService::class);
+    public function __construct(){
+        $this->transferAuthorizationService = make(TransferAuthorizationServiceInterface::class);
         $this->notification = make(NotificationInterface::class);
     }
     public function transfer(TransferDTO $transfer) : TransferDTO
@@ -68,6 +67,7 @@ class TransferService
         }
 
         $externalAuth = $this->transferAuthorizationService->externalAuthorizeTransfer($transfer);
+        var_dump($externalAuth);
         if (!$externalAuth) {
             throw new TransferNotAuthorizedException();
         }
